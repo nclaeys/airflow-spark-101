@@ -4,9 +4,11 @@ ENV PYSPARK_PYTHON python3
 WORKDIR /opt/spark/work-dir
 USER 0
 
+COPY resources/taxi_zone_lookup.csv /workspace/resources/taxi_zone_lookup.csv
+COPY resources/yellow_tripdata_2023-01.parquet /workspace/resources/yellow_tripdata_2023-01.parquet
+
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt --no-cache-dir
-COPY . .
+COPY src src
+COPY setup.py setup.py
 RUN pip3 install .
-ARG spark_uid=185
-USER ${spark_uid}

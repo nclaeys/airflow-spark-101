@@ -18,6 +18,11 @@ airflow-init_1       | 2.6.2
 start_airflow-init_1 exited with code 0
 The account created has the login airflow and the password airflow.
 
+## Make sure docker can access the docker.sock
+Quick workaround for local development:
+
+`sudo chmod 777 /var/run/docker.sock` (original is 660)
+
 ## Cleaning-up the environment
 The docker-compose environment we have prepared is a “quick-start” one. It was not designed to be used in production and it has a number of caveats - one of them being that the best way to recover from any problem is to clean it up and restart from scratch.
 
