@@ -7,8 +7,6 @@ from pyspark.sql.functions import *
 
 from pysparkexample.common.spark import ClosableSparkSession, transform, SparkLogger
 
-DataFrame.transform = transform
-
 
 def main():
     parser = argparse.ArgumentParser(description="pyspark-example")
@@ -68,14 +66,12 @@ def extract_taxi_data(spark: SparkSession, environment: str, date: str) -> DataF
 
 def transform_data(df_taxi: DataFrame, df_zone: DataFrame, date: str) -> DataFrame:
     df_id_count = df_taxi.groupBy('PULocationID', 'DOLocationID') \
-        .count().withColumnRenamed('count', 'Number of trips') \
-        .sort(desc('Number of trips'))
-
-    df_id_count.show(10, False)
+        .count().withColumnRenamed('count', 'Number of trips')
 
     df_id_count_renamed = df_id_count\
         .join(df_zone, df_id_count['PULocationID'] == df_zone['LocationID'], how='inner').drop('LocationID').withColumnRenamed('Location', 'PULocation')\
-        .join(df_zone, df_id_count['DOLocationID'] == df_zone['LocationID'], how='inner').drop('LocationID').withColumnRenamed('Location', 'DOLocation')
+        .join(df_zone, df_id_count['DOLocationID'] == df_zone['LocationID'], how='inner').drop('LocationID').withColumnRenamed('Location', 'DOLocation')\
+        .sort(desc('Number of trips'))
 
     df_id_count_renamed.show(10, False)
     return df_id_count_renamed
@@ -87,8 +83,8 @@ def persist_data(spark: SparkSession, environment: str, data: DataFrame):
     :param data: DataFrame to write.
     :return: None
     """
-    csv_location = construct_resources_path(environment, f'/{environment}/popular_taxi_rides')
-    data.write.parquet(csv_location)
+    parquet_folder = construct_resources_path(environment, f'/{environment}/popular_taxi_rides')
+    data.write.format('parquet').mode('overwrite').save(parquet_folder)
 
 
 def construct_resources_path(environment, file_name):
